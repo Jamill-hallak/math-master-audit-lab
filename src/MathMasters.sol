@@ -37,10 +37,20 @@ library MathMasters {
         // @solidity memory-safe-assembly
         assembly {
             // Equivalent to `require(y == 0 || x <= type(uint256).max / y)`.
-            if mul(y, gt(x, div(not(0), y))) {
+            if mul(y
+                 , gt(x           //if bignumb(0xfff)/y < x -> 1 if bignumb(0xfff)/y > x -> 0
+                 , div                      // -> = return 
+                    (not(0), y))) //not(0)= 0xffffffff.......f
+                    
+                    {
+                // memory slot(2) [0x40 to 0x60 : 0x000000000bac65e5b] (32bytes)
+                // @audit - Low revert with blank msg cause at memory slot(0): 0x1c =28 ,0x04 to 0x32  is empty
+                // @audit -low why override Free memory pointer ?
+                //@audit worng function selector !! -> 0xa56044f7 
                 mstore(0x40, 0xbac65e5b) // `MathMasters__MulWadFailed()`.
-                revert(0x1c, 0x04)
+                revert(0x1c, 0x04)              // memory [0x1c : ???]
             }
+            
             z := div(mul(x, y), WAD)
         }
     }
@@ -50,12 +60,31 @@ library MathMasters {
         /// @solidity memory-safe-assembly
         assembly {
             // Equivalent to `require(y == 0 || x <= type(uint256).max / y)`.
-            if mul(y, gt(x, div(not(0), y))) {
+            if mul(y,
+             gt(x,
+              div(
+                not(0), y)
+                )
+                )
+                 {
                 mstore(0x40, 0xbac65e5b) // `MathMasters__MulWadFailed()`.
                 revert(0x1c, 0x04)
             }
-            if iszero(sub(div(add(z, x), y), 1)) { x := add(x, 1) }
-            z := add(iszero(iszero(mod(mul(x, y), WAD))), div(mul(x, y), WAD))
+            // //e do x + 1  if : (x/y) -1 = 0 
+            // // @audit-high this is worng 
+            // if iszero
+            // (sub
+            // (div
+            // (add(z, x), y), 1)) { x := add(x, 1) }
+            
+            // add 1 if the remider not zero ( rounding up ) 
+            z := add( 
+                iszero(
+                    iszero (
+                        mod(
+                            mul(x, y), WAD)     ) //  x*y % 1e18  -> reminder 
+                            ), // check if divide wihtout or with  reminder 
+                            div(mul(x, y), WAD))
         }
     }
 
