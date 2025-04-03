@@ -3,8 +3,14 @@ pragma solidity ^0.8.3;
 
 import {Base_Test, console2} from "./Base_Test.t.sol";
 import {MathMasters} from "src/MathMasters.sol";
-
+import {harness} from "./harness.sol" ;
 contract MathMastersTest is Base_Test {
+
+
+// function test_revert() public{
+//         MathMasters.mulWad(type(uint256).max,type(uint256).max);
+//     }
+
     function testMulWad() public {
         assertEq(MathMasters.mulWad(2.5e18, 0.5e18), 1.25e18);
         assertEq(MathMasters.mulWad(3e18, 1e18), 3e18);
@@ -25,6 +31,17 @@ contract MathMastersTest is Base_Test {
         assertEq(MathMasters.mulWadUp(369, 271), 1);
     }
 
+ function testMulWadUpUint () public {
+    uint256 x = 0xde0b6b3a7640002 ;
+    uint256 y = 0xde0b6b3a7640002 ;
+    uint256 result = MathMasters.mulWadUp(x, y);
+    uint256 resultDown = MathMasters.mulWad(x, y);
+    console2.log("result:",result) ;
+    console2.log("resultDown:",resultDown) ;
+    assert(result == resultDown) ;
+ }
+    
+
     function testMulWadUpFuzz(uint256 x, uint256 y) public {
         // We want to skip the case where x * y would overflow.
         // Since Solidity 0.8.0 checks for overflows by default,
@@ -35,11 +52,26 @@ contract MathMastersTest is Base_Test {
             uint256 result = MathMasters.mulWadUp(x, y);
             uint256 expected = x * y == 0 ? 0 : (x * y - 1) / 1e18 + 1;
             assertEq(result, expected);
+            //171522549677111813769624179
+            //171522549677111813769614016;
         }
         // If the conditions for x and y are such that x * y would overflow,
         // this function will simply not perform the assertion.
         // In a testing context, you might want to handle this case differently,
         // depending on whether you want to consider such an overflow case as passing or failing.
+    }
+
+
+    // halmos --function check_HalmostestMulWadUpFuzz
+    function check_HalmostestMulWadUpFuzz(uint256 x, uint256 y) public pure{
+     
+        if (x == 0 || y == 0 || y <= type(uint256).max / x) {
+            uint256 result = MathMasters.mulWadUp(x, y);
+            uint256 expected = x * y == 0 ? 0 : (x * y - 1) / 1e18 + 1;
+            assert(result == expected);
+         
+        }
+       
     }
 
     function testSqrt() public {
@@ -58,4 +90,21 @@ contract MathMastersTest is Base_Test {
     function testSqrtFuzzSolmate(uint256 x) public pure {
         assert(MathMasters.sqrt(x) == solmateSqrt(x));
     }
+
+    function testharnessFuzz(uint256 x) public  {
+        harness ss  = new harness() ;
+        assertEq (ss.mathMasterTopHalf(x) ,ss.solmatTopHalf(x)) ;
+        // uint256 lhs = ss.mathMasterTopHalf(x);
+        // uint256 rhs = ss.solmatTopHalf(x);
+        //  assert(lhs == rhs);
+
+        assert (ss.mathMasterTopHalf(x) == ss.solmatTopHalf(x)) ;
+
+    }
+
+    function testSqrtWithSolmateForCertoraEdgeCase() public pure {
+        uint256 x = 0xffff2cffffffffffffffff ;
+        assert(MathMasters.sqrt(x) == solmateSqrt(x));
+    }
+
 }
