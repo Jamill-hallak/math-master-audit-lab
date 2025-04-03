@@ -5,7 +5,7 @@
 
 # 🧠 Math Masters Audit Lab
 
-This repository is a professional showcase of formal verification, low-level math, and test-driven development, combining Solidity, Certora, Halmos, and fuzz testing.
+This repository is a professional showcase of formal verification, low-level math, and test-driven development, combining Solidity,Yul, Certora, Halmos, and fuzz testing.
 
 > ⚙️ **Inspired by**:  
 > [Solmate](https://github.com/transmissions11/solmate), [Solady](https://github.com/Vectorized/solady), [obront.eth](https://twitter.com/zachobront), and built with insights from Cyfrin's [Updraft FV course](https://updraft.cyfrin.io/).  
